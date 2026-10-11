@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#062d2a">
+<meta name="apple-mobile-web-app-title" content="Rauhnächte">
+<meta name="description" content="Privates Journal für die 12 Sperrnächte und 12 Rauhnächte.">
+</head>
+<body style="margin:0">
+<title>Rauhnächte-Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&display=swap">
+<style>
+/* Layout: eine ruhige Lesespalte wie ein Notizbuch; die Nachtkarte oben ist die einzige dunkle Fläche. */
+:root {
+  --bg: #f7f1e5;
+  --paper: #fffdf8;
+  --ink: #062d2a;
+  --muted: #4c6a66;
+  --line: #dcd2c0;
+  --gold: #8f6f2e;
+  --gold-soft: #d9c499;
+  --rose: #a8766d;
+  --rose-soft: #efe2dc;
+  --night: #062d2a;
+  --night-2: #123e39;
+  --on-night: #f7f1e5;
+  --on-night-muted: #b9cbc6;
+  --star: #d9c499;
+  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-body: "Jost", "Avenir Next", system-ui, sans-serif;
+  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #03201e; --paper: #0a312d; --ink: #f3ecdf; --muted: #a9bdb8; --line: #24504a;
+    --gold: #d9c499; --gold-soft: #7d6936; --rose: #d8a89f; --rose-soft: #3b2e2b;
+    --night: #0d3d37; --night-2: #164a43; --on-night: #f7f1e5; --on-night-muted: #b9cbc6; --star: #d9c499;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #03201e; --paper: #0a312d; --ink: #f3ecdf; --muted: #a9bdb8; --line: #24504a;
+  --gold: #d9c499; --gold-soft: #7d6936; --rose: #d8a89f; --rose-soft: #3b2e2b;
+  --night: #0d3d37; --night-2: #164a43; --on-night: #f7f1e5; --on-night-muted: #b9cbc6; --star: #d9c499;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 780px; margin: 0 auto; padding-inline: 20px; padding-block: 24px 64px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.15; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 20px; }
+.brand { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.top h1 { font-size: clamp(34px, 6vw, 46px); }
+.season { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.season span { font-family: var(--font-display); font-size: 22px; font-weight: 600; min-width: 5.2ch; text-align: center; }
+.icon-btn { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; width: 34px; height: 34px; cursor: pointer; display: grid; place-items: center; }
+.icon-btn:hover { border-color: var(--gold); }
+
+nav.tabs { display: flex; flex-wrap: wrap; gap: 4px 18px; border-bottom: 1px solid var(--line); margin-block: 18px 22px; }
+nav.tabs button { background: none; border: 0; padding: 8px 0 10px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
+nav.tabs button[aria-current="page"] { color: var(--ink); border-bottom-color: var(--gold); }
+.status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--gold-soft); }
+.status[data-state="saving"]::before { background: var(--gold); }
+.status[data-state="error"]::before { background: var(--rose); }
+
+.nightcard { position: relative; overflow: hidden; background: var(--night); color: var(--on-night); border-radius: 22px; padding: 28px 26px; display: grid; gap: 12px; }
+.nightcard::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .55;
+  background-image: radial-gradient(1.5px 1.5px at 12% 22%, var(--star) 50%, transparent 52%), radial-gradient(1px 1px at 28% 70%, var(--star) 50%, transparent 52%),
+  radial-gradient(1.2px 1.2px at 64% 18%, var(--star) 50%, transparent 52%), radial-gradient(1px 1px at 82% 56%, var(--star) 50%, transparent 52%),
+  radial-gradient(1.6px 1.6px at 92% 14%, var(--star) 50%, transparent 52%), radial-gradient(1px 1px at 46% 86%, var(--star) 50%, transparent 52%); }
+.nightcard > * { position: relative; }
+.nightcard .eyebrow { color: var(--star); }
+.nightcard h2 { font-size: clamp(30px, 5vw, 40px); }
+.nightcard p { color: var(--on-night-muted); max-width: 58ch; }
+.big-count { font-family: var(--font-display); font-size: clamp(54px, 10vw, 76px); line-height: 1; font-variant-numeric: tabular-nums; }
+.btn { display: inline-flex; align-items: center; gap: 8px; justify-self: start; border-radius: 999px; padding: 10px 20px; cursor: pointer; font-weight: 500; border: 1px solid var(--gold); background: var(--gold); color: var(--paper); }
+.nightcard .btn { background: var(--star); border-color: var(--star); color: var(--night); }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--gold); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+.eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+section.phase { margin-top: 38px; display: grid; gap: 14px; }
+.phase-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; }
+.phase-head h2 { font-size: 30px; }
+.phase-head .dates { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.phase > p { color: var(--muted); max-width: 62ch; }
+.tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tile { position: relative; text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 10px 10px 9px; cursor: pointer; display: grid; gap: 1px; min-width: 0; }
+.tile:hover { border-color: var(--gold); }
+.tile .n { font-family: var(--font-display); font-size: 24px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.tile .m { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile .d { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tile.filled::after { content: ""; position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+.tile.today { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-soft); }
+.tile.future .n, .tile.future .m { opacity: .62; }
+.holy { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; background: var(--rose-soft); border-radius: 16px; padding: 14px 18px; }
+.holy strong { font-family: var(--font-display); font-size: 21px; }
+.holy .d { color: var(--muted); font-size: 14px; }
+
+/* Nacht-Ansicht */
+.back { background: none; border: 0; padding: 0; cursor: pointer; color: var(--muted); font-size: 14px; }
+.back:hover { color: var(--ink); }
+.night-head { display: grid; gap: 8px; margin-block: 14px 22px; }
+.night-head h2 { font-size: clamp(32px, 6vw, 44px); }
+.night-head .intro { max-width: 62ch; font-size: 17px; }
+.questions { margin: 0; padding: 18px 20px 18px 38px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; display: grid; gap: 6px; }
+.questions li { font-family: var(--font-display); font-size: 20px; font-style: italic; line-height: 1.35; }
+.fields { display: grid; gap: 22px; margin-top: 26px; }
+.field { display: grid; gap: 6px; }
+.field label, .field .label { font-weight: 500; font-size: 15px; }
+.field .hint { font-size: 13.5px; color: var(--muted); margin-top: -4px; }
+textarea, input[type="text"] { width: 100%; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+textarea { min-height: 120px; resize: vertical; line-height: 1.65;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(1.65em - 1px), color-mix(in srgb, var(--line) 55%, transparent) calc(1.65em - 1px), color-mix(in srgb, var(--line) 55%, transparent) 1.65em);
+  background-attachment: local; background-position: 0 12px; }
+textarea:focus, input[type="text"]:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold-soft) 45%, transparent); }
+.moods { display: flex; flex-wrap: wrap; gap: 8px; }
+.moods button { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 14px; }
+.moods button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.rituals { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.rituals label { display: inline-flex; align-items: center; gap: 8px; font-weight: 400; cursor: pointer; }
+.rituals input { accent-color: var(--gold); width: 17px; height: 17px; }
+.word input { font-family: var(--font-hand); font-size: 28px; padding-block: 4px; }
+.wishbox { background: var(--night); color: var(--on-night); border-radius: 18px; padding: 18px 20px; display: grid; gap: 10px; }
+.wishbox p { color: var(--on-night-muted); }
+.wishbox .btn { background: var(--star); border-color: var(--star); color: var(--night); }
+.pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--line); }
+.pager button { background: none; border: 0; cursor: pointer; padding: 0; text-align: left; max-width: 48%; min-width: 0; }
+.pager button:last-child { text-align: right; margin-left: auto; }
+.pager small { display: block; color: var(--muted); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.pager span { font-family: var(--font-display); font-size: 19px; font-weight: 600; }
+
+/* Wünsche */
+.wishes-intro { display: grid; gap: 10px; max-width: 62ch; margin-bottom: 22px; }
+.wishes-intro h2 { font-size: 34px; }
+.wish-list { display: grid; gap: 8px; counter-reset: wish; margin-bottom: 18px; }
+.wish-row { display: grid; grid-template-columns: 2.2em 1fr; align-items: center; gap: 8px; }
+.wish-row span { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--gold); text-align: right; font-variant-numeric: tabular-nums; }
+.wish-row input { font-family: var(--font-hand); font-size: 23px; padding-block: 4px; }
+.slips { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; margin-block: 18px; }
+.slip { aspect-ratio: 3 / 2; max-width: 100%; border-radius: 6px; background: var(--paper); border: 1px solid var(--line); display: grid; place-items: center; font-family: var(--font-hand); font-size: 22px; color: var(--muted); position: relative; }
+.slip::before { content: ""; position: absolute; left: 8px; right: 8px; top: 50%; border-top: 1px dashed var(--line); }
+.slip span { position: relative; background: var(--paper); padding-inline: 6px; }
+.slip.burned { background: transparent; border-style: dashed; color: var(--rose); }
+.slip.burned::before { display: none; }
+.slip.burned span { background: transparent; font-family: var(--font-body); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.reveal { background: var(--rose-soft); border-radius: 18px; padding: 22px; display: grid; gap: 8px; }
+.reveal .wish { font-family: var(--font-hand); font-size: 32px; line-height: 1.2; }
+.confirm { display: grid; gap: 10px; background: var(--rose-soft); border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* Jahresbild */
+.yearmap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+@media (max-width: 620px) { .yearmap { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.month { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.month h3 { font-size: 20px; }
+.month .w { font-family: var(--font-hand); font-size: 26px; line-height: 1.1; color: var(--gold); min-height: 1.1em; overflow-wrap: anywhere; }
+.month .w.empty { font-family: var(--font-body); font-size: 13px; color: var(--muted); }
+.month .rel { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.month .rel b { font-weight: 500; color: var(--ink); }
+
+/* Export */
+.export { display: grid; gap: 12px; }
+.export h2 { font-size: 32px; }
+.export textarea { min-height: 300px; font-size: 13.5px; background-image: none; }
+.note { font-size: 13.5px; color: var(--muted); max-width: 62ch; }
+@media (prefers-reduced-motion: no-preference) { .view { animation: rise .35s ease-out; } }
+@keyframes rise { from { transform: translateY(6px); } to { transform: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="brand">Sperrnächte &amp; Rauhnächte</div>
+      <h1>Rauhnächte-Journal</h1>
+    </div>
+    <div class="season" aria-label="Jahreskreis wählen">
+      <button class="icon-btn" id="season-prev" aria-label="Vorheriger Jahreskreis">‹</button>
+      <span id="season-label">2026/27</span>
+      <button class="icon-btn" id="season-next" aria-label="Nächster Jahreskreis">›</button>
+    </div>
+  </header>
+  <nav class="tabs" aria-label="Bereiche">
+    <button data-view="overview">Übersicht</button>
+    <button data-view="wishes">13 Wünsche</button>
+    <button data-view="year">Jahresbild</button>
+    <button data-view="export">Sichern</button>
+    <span class="status" id="status" data-state="idle" style="margin-left:auto">Auf diesem Gerät gespeichert</span>
+  </nav>
+  <main id="app"></main>
+</div>
+
+<script>
+(() => {
+const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const MOODS = ["schwer","unruhig","still","leicht","strahlend"];
+
+const SPERR = [
+  ["Anfänge", "Erinnere dich an deinen Jahresbeginn. Mit welchen Hoffnungen und Vorsätzen bist du losgegangen?", ["Welche Vorsätze haben dich eher unter Druck gesetzt als getragen?", "Was aus diesem Januar darfst du heute freigeben?"]],
+  ["Stille und Rückzug", "Der Februar ist die Zeit unter der Schneedecke. Schau auf das, was im Verborgenen lag.", ["Wo hast du dich zurückgehalten, obwohl du sprechen wolltest?", "Welche Müdigkeit oder Schwere darf jetzt gehen?"]],
+  ["Erwachen", "Im März drängt das Leben nach oben. Was wollte in dir wachsen?", ["Was durfte nicht wachsen und warum?", "Welche Ungeduld mit dir selbst lässt du los?"]],
+  ["Wandel", "Der April ist launisch. Denk an die Veränderungen, die dich überrascht haben.", ["Welche Veränderung hat dich verunsichert?", "An welchem alten Bild von dir hältst du noch fest?"]],
+  ["Lebensfreude", "Im Mai blüht alles. Wann hast du dich in diesem Jahr lebendig gefühlt?", ["Was hat deine Freude gedämpft?", "Welches Verbot an dich selbst darf fallen?"]],
+  ["Fülle und Licht", "Der Juni ist die hellste Zeit. Wo hast du gestrahlt, wo dich verausgabt?", ["Wo hast du mehr gegeben, als du hattest?", "Welche Erwartung anderer gibst du zurück?"]],
+  ["Herz und Beziehungen", "Der Juli steht für Wärme und Nähe. Welche Menschen haben dein Jahr geprägt?", ["Welche Begegnung wirkt noch in dir nach?", "Wem verzeihst du, damit du selbst frei wirst?"]],
+  ["Ernte", "Im August wird geerntet. Schau auf das, was du geschaffen hast, und auf das, was liegen blieb.", ["Was ist unerledigt geblieben und darf es auch bleiben?", "Welcher Anspruch an Perfektion darf gehen?"]],
+  ["Ordnung", "Der September bringt Ausgleich. Welche Strukturen haben dich getragen, welche eingeengt?", ["Welche Gewohnheit trägt dich nicht mehr?", "Was räumst du in deinem Alltag frei?"]],
+  ["Loslassen", "Im Oktober lassen die Bäume ihre Blätter fallen, ohne Kampf.", ["Wovon hast du dich in diesem Jahr schon verabschiedet?", "Was hältst du noch fest, obwohl es längst welk ist?"]],
+  ["Schatten und Ahnen", "Der November führt nach innen. Alte Themen und Familienmuster melden sich.", ["Welcher alte Schmerz hat sich in diesem Jahr gezeigt?", "Welches Familienmuster gibst du an die Ahnen zurück?"]],
+  ["Abschluss", "Die letzte Sperrnacht schließt den Kreis. Danach ist Pause bis Heiligabend.", ["Was nimmst du nicht mit ins neue Jahr?", "Wofür bist du diesem Jahr trotz allem dankbar?"]],
+];
+const RAUH = [
+  ["Wurzeln und Neubeginn", "Die erste Rauhnacht ist die Heilige Nacht. Sie legt das Fundament für das neue Jahr. Übergib heute den ersten Wunschzettel dem Feuer.", ["Was soll im neuen Jahr dein festes Fundament sein?", "Welche Kraft deiner Ahnen nimmst du mit?"]],
+  ["Vertrauen", "Die zweite Nacht steht für innere Führung und Vertrauen ins Leben.", ["Wo darfst du deiner Intuition mehr glauben?", "Was würdest du tun, wenn du sicher wärst, gehalten zu sein?"]],
+  ["Aufbruch und Mut", "Die dritte Nacht öffnet Türen. Spür hin, wohin es dich zieht.", ["Welcher Schritt wartet schon lange auf dich?", "Wovor hast du Angst und was liegt dahinter?"]],
+  ["Wachstum", "Die vierte Nacht bringt Erneuerung. Was darf in dir aufblühen?", ["Was willst du im neuen Jahr lernen oder wachsen lassen?", "Welche Fähigkeit von dir braucht mehr Raum?"]],
+  ["Liebe und Lebensfreude", "Die fünfte Nacht gehört dem Herzen.", ["Wie möchtest du Liebe im neuen Jahr leben, dir selbst und anderen gegenüber?", "Was bringt dich zuverlässig zum Lachen?"]],
+  ["Fülle und Selbstwert", "Die sechste Nacht fragt nach deinem Wert und deiner Fülle.", ["Was bist du dir im neuen Jahr wert?", "Wo darfst du mehr annehmen, als du gibst?"]],
+  ["Kraft und Reife", "Die siebte Nacht steht für gelebte Kraft und reife Entscheidungen.", ["Wo willst du im neuen Jahr klar Ja oder Nein sagen?", "Was nährt deine Kraft wirklich?"]],
+  ["Schwelle", "Die achte Nacht ist die Silvesternacht, die Schwelle zwischen den Jahren.", ["Was lässt du an der Schwelle zurück?", "Welchen Segen sprichst du über dein neues Jahr?"]],
+  ["Weisheit und Klarheit", "Die neunte Nacht bringt Klarheit. Höre auf deine innere Stimme.", ["Welche Wahrheit kennst du längst?", "Welche Frage möchtest du dem neuen Jahr stellen?"]],
+  ["Heilung", "Die zehnte Nacht steht für Heilung und Vergebung.", ["Was in dir möchte im neuen Jahr heilen?", "Wie kannst du sanfter mit dir sein?"]],
+  ["Stille und Abschied", "Die elfte Nacht führt in die Stille. Nicht alles muss gelöst werden.", ["Was darfst du im neuen Jahr ruhen lassen?", "Wem oder was möchtest du ehrlich danken?"]],
+  ["Vollendung", "Die zwölfte Nacht vollendet den Kreis. Die Zeit zwischen den Jahren schließt sich.", ["Wie fühlt sich dein neues Jahr an, wenn du es dir vorstellst?", "Welche Botschaft gibst du dir selbst mit?"]],
+];
+const SPERR_RITUALS = ["Geräuchert", "Kerze entzündet", "Loslass-Zettel verbrannt", "Eine Ecke aufgeräumt"];
+const RAUH_RITUALS = ["Geräuchert", "Kerze entzündet", "Spaziergang in Stille", "Orakelkarte gezogen"];
+
+// ---------- Daten und Zeit ----------
+const now = new Date();
+const dayOnly = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+// Vor 5 Uhr morgens zählt noch die Nacht vom Vorabend.
+const tonight = dayOnly(new Date(now.getTime() - 5 * 3600 * 1000));
+const currentSeason = tonight.getMonth() >= 6 ? tonight.getFullYear() : tonight.getFullYear() - 1;
+let S = currentSeason;
+
+function nightsFor(y) {
+  const list = [];
+  // Sperrnächte: 8./9. bis 19./20. Dezember. Rauhnächte: 24./25. Dezember bis 4./5. Januar, Abschluss am 6. Januar.
+  SPERR.forEach(([theme, intro, q], i) => list.push({ id: "s" + (i + 1), kind: "sperr", n: i + 1, month: i, start: new Date(y, 11, 8 + i), theme, intro, q }));
+  RAUH.forEach(([theme, intro, q], i) => list.push({ id: "r" + (i + 1), kind: "rauh", n: i + 1, month: i, start: new Date(y, 11, 24 + i), theme, intro, q }));
+  list.push({ id: "end", kind: "abschluss", n: 13, month: null, start: new Date(y + 1, 0, 6), theme: "Dein dreizehnter Wunsch",
+    intro: "Am Dreikönigstag schließt sich die Zeit zwischen den Jahren. Zwölf Wünsche sind beim Universum. Den dreizehnten öffnest du heute: Um ihn kümmerst du dich das ganze Jahr selbst.",
+    q: ["Was ist dein erster Schritt für deinen dreizehnten Wunsch?", "Was nimmst du aus den Rauhnächten mit in dein Jahr?"] });
+  return list;
+}
+let NIGHTS = nightsFor(S);
+const byId = id => NIGHTS.find(n => n.id === id);
+const addDays = (d, k) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + k);
+const fmt = (d, opts) => d.toLocaleDateString("de-DE", opts);
+const nightSpan = d => { const e = addDays(d, 1); return d.getMonth() === e.getMonth() ? `${d.getDate()}./${e.getDate()}.${String(d.getMonth() + 1).padStart(2, "0")}.` : `${fmt(d, { day: "numeric", month: "numeric" })}/${fmt(e, { day: "numeric", month: "numeric" })}`; };
+const nightLong = (d, n) => n && n.kind === "abschluss" ? fmt(d, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : `Nacht vom ${fmt(d, { day: "numeric", month: "long" })} auf den ${fmt(addDays(d, 1), { day: "numeric", month: "long", year: "numeric" })}`;
+const daysBetween = (a, b) => Math.round((dayOnly(b) - dayOnly(a)) / 86400000);
+const nightTitle = n => n.kind === "abschluss" ? "Abschluss" : `${n.n}. ${n.kind === "sperr" ? "Sperrnacht" : "Rauhnacht"}`;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ---------- Speicher ----------
+let data = {};
+const store = { coll: null, downloads: null, ready: false };
+const statusEl = document.getElementById("status");
+function setStatus(state, text) { statusEl.dataset.state = state; statusEl.textContent = text; }
+const idleText = () => store.coll ? "In deinem Konto gespeichert" : "Auf diesem Gerät gespeichert";
+
+const localKey = () => "rauhnaechte-journal-" + S;
+function loadLocal() { try { return JSON.parse(localStorage.getItem(localKey())) || {}; } catch { return {}; } }
+function saveLocal() { try { localStorage.setItem(localKey(), JSON.stringify(data)); } catch {} }
+
+async function loadCloud() {
+  if (!store.coll) return;
+  try {
+    const snap = await store.coll.get();
+    const prefix = S + "_";
+    const cloud = {};
+    snap.docs.forEach(d => { if (d.exists && d.id.startsWith(prefix)) cloud[d.id.slice(prefix.length)] = JSON.parse(JSON.stringify(d.data())); });
+    // Was nur lokal liegt (z. B. vor der Anmeldung geschrieben), wandert ins Konto.
+    Object.keys(data).forEach(k => { if (!(k in cloud)) { cloud[k] = data[k]; pending.add(k); } });
+    data = cloud;
+    saveLocal();
+    if (pending.size) scheduleSave();
+    setStatus("idle", idleText());
+  } catch (e) {
+    setStatus("error", "Konto nicht erreichbar, Einträge bleiben auf diesem Gerät");
+  }
+}
+
+const pending = new Set();
+let saveTimer = null;
+function touch(key) { pending.add(key); saveLocal(); setStatus("saving", "Wird gespeichert …"); scheduleSave(); }
+function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(flush, 800); }
+async function flush() {
+  if (!store.coll) { pending.clear(); setStatus("idle", idleText()); return; }
+  const keys = [...pending]; pending.clear();
+  try {
+    for (const k of keys) await store.coll.doc(S + "_" + k).set(data[k] || {});
+    if (!pending.size) setStatus("idle", idleText());
+  } catch (e) {
+    keys.forEach(k => pending.add(k));
+    setStatus("error", e && e.code === "quota_exceeded" ? "Speicher voll. Bitte unter Sichern eine Kopie ziehen." : "Nicht ins Konto gespeichert. Neuer Versuch beim nächsten Tippen.");
+  }
+}
+
+async function connect() {
+  if (!window.claude || !window.claude.use) return;
+  try {
+    const [db, user, dl] = await Promise.all([claude.use("db"), claude.use("user"), claude.use("downloads")]);
+    store.downloads = dl;
+    if (!db || !user) return;
+    const id = await user.id();
+    if (!id) return;
+    store.coll = db.collection("data/users/" + id);
+    await loadCloud();
+    if (!isTyping()) render();
+  } catch {}
+}
+const isTyping = () => { const a = document.activeElement; return a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT"); };
+
+const entry = id => (data[id] ||= {});
+const hasContent = e => !!e && Object.entries(e).some(([k, v]) => k === "rituals" ? Object.values(v || {}).some(Boolean) : typeof v === "string" ? v.trim() : v != null);
+const wishes = () => { const w = data.wishes; if (!w || !Array.isArray(w.list)) data.wishes = { list: Array(13).fill(""), sealed: false, burned: {} }; return data.wishes; };
+const burnedCount = () => Object.keys(wishes().burned || {}).length;
+
+// ---------- Ansichten ----------
+const app = document.getElementById("app");
+let view = { name: "overview" };
+function go(v) { if (v.name !== "export") { importCandidate = null; importMsg = ""; } view = v; render(); window.scrollTo({ top: 0 }); }
+
+function render() {
+  document.getElementById("season-label").textContent = `${S}/${String(S + 1).slice(2)}`;
+  document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.view === (view.name === "night" ? "overview" : view.name) ? "page" : "false"));
+  const html = { overview: renderOverview, night: renderNight, wishes: renderWishes, year: renderYear, export: renderExport }[view.name]();
+  app.innerHTML = `<div class="view">${html}</div>`;
+  bind();
+}
+
+function heroHtml() {
+  const first = byId("s1").start, sLast = byId("s12").start, rFirst = byId("r1").start, end = byId("end").start;
+  const t = tonight;
+  const current = NIGHTS.find(n => +n.start === +t);
+  if (current) {
+    const isEnd = current.kind === "abschluss";
+    return `<div class="nightcard"><div class="eyebrow">${isEnd ? "Heute" : "Heute Nacht"} · ${esc(nightLong(current.start, current))}</div>
+      <h2>${esc(nightTitle(current))}${current.month != null ? " · " + MONTHS[current.month] : ""}</h2>
+      <p>${esc(current.intro)}</p>
+      <button class="btn" data-open="${current.id}">${isEnd ? "Wunsch öffnen" : "Eintrag schreiben"}</button></div>`;
+  }
+  if (t < first) {
+    const d = daysBetween(t, first);
+    return `<div class="nightcard"><div class="eyebrow">Bis zur ersten Sperrnacht</div>
+      <div class="big-count">${d} ${d === 1 ? "Tag" : "Tage"}</div>
+      <p>Am ${fmt(first, { day: "numeric", month: "long" })} beginnen die zwölf Sperrnächte. Jede Nacht schaust du auf einen Monat des vergangenen Jahres zurück und lässt los, was du nicht mitnehmen willst. Du kannst die Impulse schon jetzt lesen.</p>
+      <button class="btn" data-open="s1">Erste Sperrnacht ansehen</button></div>`;
+  }
+  if (t > sLast && t < rFirst) {
+    const d = daysBetween(t, rFirst);
+    return `<div class="nightcard"><div class="eyebrow">Pause · bis zur ersten Rauhnacht</div>
+      <div class="big-count">${d} ${d === 1 ? "Tag" : "Tage"}</div>
+      <p>Die Sperrnächte sind vorbei. Die Tage bis Heiligabend sind Ruhetage. Nutze sie, um deine 13 Wünsche zu formulieren und vor der ersten Rauhnacht zu versiegeln.</p>
+      <button class="btn" data-go="wishes">13 Wünsche schreiben</button></div>`;
+  }
+  if (t > end) {
+    return `<div class="nightcard"><div class="eyebrow">Der Kreis ist geschlossen</div>
+      <h2>Dein Jahresbild ist fertig</h2>
+      <p>Die zwölf Rauhnächte sind vorüber. Jede Nacht steht für einen Monat deines neuen Jahres. Schau zum Monatsbeginn in dein Jahresbild.</p>
+      <button class="btn" data-go="year">Jahresbild öffnen</button></div>`;
+  }
+  if (t > byId("r12").start && t < end) {
+    return `<div class="nightcard"><div class="eyebrow">Morgen · Dreikönigstag</div>
+      <h2>Die zwölf Rauhnächte sind vollendet</h2>
+      <p>Am ${fmt(end, { day: "numeric", month: "long" })} schließt sich die Zeit zwischen den Jahren und dein dreizehnter Wunsch zeigt sich.</p>
+      <button class="btn" data-open="end">Abschluss ansehen</button></div>`;
+  }
+  return "";
+}
+
+function tileHtml(n) {
+  const cls = ["tile"];
+  if (hasContent(data[n.id])) cls.push("filled");
+  if (+n.start === +tonight) cls.push("today");
+  else if (n.start > tonight) cls.push("future");
+  return `<button class="${cls.join(" ")}" data-open="${n.id}" aria-label="${esc(nightTitle(n))}, ${MONTHS[n.month]}, ${esc(nightLong(n.start))}">
+    <span class="n">${n.n}</span><span class="m">${MONTHS[n.month]}</span><span class="d">${nightSpan(n.start)}</span></button>`;
+}
+
+function renderOverview() {
+  const sperr = NIGHTS.filter(n => n.kind === "sperr"), rauh = NIGHTS.filter(n => n.kind === "rauh"), end = byId("end");
+  const pauseFrom = addDays(sperr[11].start, 1), pauseTo = addDays(rauh[0].start, -1);
+  const w = wishes();
+  const wishState = w.sealed ? `${13 - burnedCount()} von 13 Zetteln übrig` : `${w.list.filter(x => x.trim()).length} von 13 Wünschen geschrieben`;
+  const dm = { day: "numeric", month: "long" };
+  return `${heroHtml()}
+  <section class="phase">
+    <div class="phase-head"><h2>Sperrnächte</h2><span class="dates">${fmt(sperr[0].start, dm)} – ${fmt(sperr[11].start, dm)}</span></div>
+    <p>Zwölf Nächte der Rückschau. Jede gehört einem Monat des vergangenen Jahres: Du erinnerst, ordnest und lässt los.</p>
+    <div class="tiles">${sperr.map(tileHtml).join("")}</div>
+  </section>
+  <section class="phase">
+    <div class="holy"><div><strong>Pause</strong> <span class="d">· ${pauseFrom.getDate()}.–${fmt(pauseTo, dm)} · Ruhetage. Zeit für deine 13 Wünsche (${wishState}).</span></div>
+      <button class="btn ghost" data-go="wishes">${w.sealed ? "Zettel ansehen" : "Wünsche schreiben"}</button></div>
+  </section>
+  <section class="phase">
+    <div class="phase-head"><h2>Rauhnächte</h2><span class="dates">${fmt(rauh[0].start, dm)} – ${fmt(end.start, { ...dm, year: "numeric" })}</span></div>
+    <p>Zwölf Nächte zwischen den Jahren, von Heiligabend bis zum Dreikönigstag. Jede steht für einen Monat des kommenden Jahres. Achte auf Träume, Zeichen und das Wetter des Tages. In jeder Nacht übergibst du einen Wunschzettel dem Feuer.</p>
+    <div class="tiles">${rauh.map(tileHtml).join("")}</div>
+    <div class="holy"><div><strong>Abschluss</strong> <span class="d">· ${fmt(end.start, dm)} · Dein dreizehnter Wunsch</span></div>
+      <button class="btn ghost" data-open="end">${hasContent(data.end) ? "Eintrag öffnen" : "Ansehen"}</button></div>
+  </section>`;
+}
+
+function textField(n, key, label, hint, rows) {
+  const id = `f-${n.id}-${key}`;
+  return `<div class="field"><label for="${id}">${esc(label)}</label>${hint ? `<div class="hint">${esc(hint)}</div>` : ""}
+    <textarea id="${id}" data-key="${key}" rows="${rows || 5}">${esc(entry(n.id)[key])}</textarea></div>`;
+}
+
+function thirteenthHtml() {
+  const w = wishes();
+  const burned = new Set(Object.keys(w.burned).map(Number));
+  if (!w.sealed) return `<div class="wishbox"><div class="eyebrow" style="color:var(--star)">13 Wünsche</div>
+    <p>Du hast keine Wünsche versiegelt. Schreib sie im nächsten Jahr vor der ersten Rauhnacht auf.</p></div>`;
+  if (burned.size < 12) return `<div class="wishbox"><div class="eyebrow" style="color:var(--star)">13 Wünsche</div>
+    <p>${burned.size} von 12 Zetteln sind dem Feuer übergeben. Dein dreizehnter Wunsch zeigt sich, wenn alle zwölf verbrannt sind.</p></div>`;
+  const last = w.list.findIndex((_, i) => !burned.has(i));
+  return `<div class="reveal"><div class="eyebrow">Dein dreizehnter Wunsch</div><div class="wish">${esc(w.list[last])}</div>
+    <p class="note">Um diesen Wunsch kümmerst du dich das ganze Jahr selbst.</p></div>`;
+}
+
+function renderNight() {
+  const n = byId(view.id);
+  const e = entry(n.id);
+  const idx = NIGHTS.indexOf(n), prev = NIGHTS[idx - 1], next = NIGHTS[idx + 1];
+  const month = n.month != null ? MONTHS[n.month] : null;
+  const rituals = n.kind === "sperr" ? SPERR_RITUALS : RAUH_RITUALS;
+  let fields = `<div class="field"><span class="label" id="mood-l">Wie fühlst du dich heute?</span>
+    <div class="moods" role="group" aria-labelledby="mood-l">${MOODS.map(m => `<button data-mood="${m}" aria-pressed="${e.mood === m}">${m}</button>`).join("")}</div></div>`;
+  if (n.kind === "sperr") {
+    fields += textField(n, "review", `Rückblick auf deinen ${month}`, "Was ist in diesem Monat geschehen? Was fällt dir zuerst ein?", 6)
+      + textField(n, "answer", "Antworten auf die Impulsfragen", "", 6)
+      + textField(n, "release", "Das lasse ich los", "Schreib es auch auf einen Zettel und verbrenne ihn, wenn du magst.", 4)
+      + textField(n, "thanks", `Dafür danke ich dem ${month}`, "", 3);
+  } else if (n.kind === "rauh") {
+    fields += textField(n, "dream", "Mein Traum der Nacht", "Schreib ihn gleich nach dem Aufwachen auf, auch Bruchstücke.", 5)
+      + textField(n, "signs", "Zeichen, Begegnungen und Wetter des Tages", `Der Tag gilt als Vorschau auf deinen ${month}.`, 4)
+      + textField(n, "answer", "Antworten auf die Impulsfragen", "", 6)
+      + `<div class="field word"><label for="f-${n.id}-word">Ein Wort für den ${month}</label>
+         <input type="text" id="f-${n.id}-word" data-key="word" maxlength="40" value="${esc(e.word)}" placeholder="z. B. Vertrauen"></div>`;
+  } else {
+    fields = thirteenthHtml() + fields
+      + textField(n, "answer", "Mein erster Schritt", "Was tust du konkret für deinen dreizehnten Wunsch?", 4)
+      + textField(n, "intention", "Was ich aus den Rauhnächten mitnehme", "", 5);
+  }
+  if (n.kind !== "abschluss") {
+    fields += `<div class="field"><span class="label">Kleine Rituale</span><div class="rituals">${rituals.map((r, i) =>
+      `<label><input type="checkbox" id="r-${n.id}-${i}" data-ritual="${esc(r)}" ${e.rituals?.[r] ? "checked" : ""}> ${esc(r)}</label>`).join("")}</div></div>`;
+  }
+  if (n.kind === "rauh") fields += wishBoxHtml(n);
+  const pagerLabel = x => x.month != null ? MONTHS[x.month] : x.theme;
+  return `<button class="back" data-go="overview">← Zur Übersicht</button>
+  <div class="night-head">
+    <div class="eyebrow">${esc(nightTitle(n))} · ${esc(nightLong(n.start, n))}</div>
+    <h2>${month ? esc(month) + " · " : ""}${esc(n.theme)}</h2>
+    <p class="intro">${esc(n.intro)}</p>
+  </div>
+  <ol class="questions">${n.q.map(q => `<li>${esc(q)}</li>`).join("")}</ol>
+  <div class="fields">${fields}</div>
+  <div class="pager">
+    ${prev ? `<button data-open="${prev.id}"><small>← ${esc(nightTitle(prev))}</small><span>${esc(pagerLabel(prev))}</span></button>` : "<span></span>"}
+    ${next ? `<button data-open="${next.id}"><small>${esc(nightTitle(next))} →</small><span>${esc(pagerLabel(next))}</span></button>` : ""}
+  </div>`;
+}
+
+function wishBoxHtml(n) {
+  const w = wishes();
+  if (!w.sealed) return `<div class="wishbox"><div class="eyebrow" style="color:var(--star)">Wunschzettel</div>
+    <p>Du hast deine 13 Wünsche noch nicht versiegelt. Schreib sie auf, dann kannst du in jeder Rauhnacht einen Zettel dem Feuer übergeben.</p>
+    <button class="btn" data-go="wishes">Wünsche schreiben</button></div>`;
+  const done = Object.values(w.burned).includes(n.id);
+  const left = 13 - burnedCount();
+  if (done) return `<div class="wishbox"><div class="eyebrow" style="color:var(--star)">Wunschzettel</div>
+    <p>In dieser Nacht hast du einen Zettel ungelesen dem Feuer übergeben. Das Universum kümmert sich darum. ${left} Zettel liegen noch bereit.</p></div>`;
+  if (left <= 1) return "";
+  return `<div class="wishbox"><div class="eyebrow" style="color:var(--star)">Wunschzettel · ${left} übrig</div>
+    <p>Zieh einen Zettel, ohne ihn zu lesen, und übergib ihn dem Feuer. Wenn du mit echten Zetteln arbeitest, verbrenne dort einen und markiere es hier.</p>
+    <button class="btn" data-burn="${n.id}">Einen Zettel dem Feuer übergeben</button></div>`;
+}
+
+let sealConfirm = false;
+function renderWishes() {
+  const w = wishes();
+  const head = `<div class="wishes-intro"><div class="eyebrow">Ritual der 13 Wünsche</div><h2>Dreizehn Zettel für das neue Jahr</h2>
+    <p>Schreib vor der ersten Rauhnacht, spätestens an Heiligabend, 13 Wünsche auf, jeden auf einen eigenen Zettel. Formuliere sie so, als wären sie schon wahr. In jeder der zwölf Rauhnächte ziehst du einen Zettel, ohne ihn zu lesen, und übergibst ihn dem Feuer. Um diese Wünsche kümmert sich das Universum.</p>
+    <p>Der dreizehnte Zettel bleibt übrig. Um diesen Wunsch kümmerst du dich das ganze Jahr selbst.</p></div>`;
+  if (!w.sealed) {
+    const filled = w.list.filter(x => x.trim()).length;
+    return head + `<div class="wish-list">${w.list.map((x, i) => `<div class="wish-row"><span>${i + 1}</span>
+      <input type="text" id="wish-${i}" data-wish="${i}" maxlength="160" value="${esc(x)}" placeholder="${i === 0 ? "Ich lebe in einem Zuhause, das mich nährt." : ""}" aria-label="Wunsch ${i + 1}"></div>`).join("")}</div>
+      <div class="row"><button class="btn" id="seal" ${filled < 13 ? "disabled" : ""}>Wünsche versiegeln</button>
+      <span class="note" id="wish-count">${filled} von 13 geschrieben</span></div>
+      ${sealConfirm ? `<div class="confirm"><p>Nach dem Versiegeln kannst du die Wünsche nicht mehr lesen oder ändern. Erst nach der zwölften Rauhnacht zeigt sich der dreizehnte.</p>
+        <div class="row"><button class="btn" id="seal-yes">Ja, versiegeln</button><button class="btn ghost" id="seal-no">Noch nicht</button></div></div>` : ""}`;
+  }
+  const burnedIdx = new Set(Object.keys(w.burned).map(Number));
+  const slips = w.list.map((_, i) => burnedIdx.has(i) ? `<div class="slip burned"><span>verbrannt</span></div>` : `<div class="slip"><span>✶</span></div>`).join("");
+  let reveal = "";
+  if (burnedIdx.size >= 12) {
+    const last = w.list.findIndex((_, i) => !burnedIdx.has(i));
+    reveal = `<div class="reveal"><div class="eyebrow">Dein dreizehnter Wunsch</div><div class="wish">${esc(w.list[last])}</div>
+      <p class="note">Um diesen Wunsch kümmerst du dich selbst. Was ist dein erster Schritt?</p></div>`;
+  }
+  return head + `<p class="note">${burnedIdx.size} von 12 Zetteln dem Feuer übergeben. Den nächsten Zettel ziehst du in der Ansicht der jeweiligen Rauhnacht.</p>
+    <div class="slips">${slips}</div>${reveal}`;
+}
+
+function renderYear() {
+  const cells = MONTHS.map((m, i) => {
+    const r = data["r" + (i + 1)] || {}, s = data["s" + (i + 1)] || {};
+    const word = (r.word || "").trim(), rel = (s.release || "").trim();
+    return `<div class="month"><h3>${m}</h3>
+      <div class="w ${word ? "" : "empty"}">${word ? esc(word) : "noch kein Wort"}</div>
+      ${rel ? `<div class="rel"><b>Losgelassen:</b> ${esc(rel.length > 90 ? rel.slice(0, 88) + " …" : rel)}</div>` : ""}</div>`;
+  }).join("");
+  return `<div class="wishes-intro"><div class="eyebrow">Jahresbild ${S + 1}</div><h2>Zwölf Monate, zwölf Nächte</h2>
+    <p>Jede Rauhnacht steht für einen Monat des neuen Jahres. Hier sammeln sich deine Worte aus den Rauhnächten und was du in den Sperrnächten losgelassen hast. Schau zu jedem Monatsbeginn hinein.</p></div>
+    <div class="yearmap">${cells}</div>`;
+}
+
+function exportText() {
+  const out = [`# Rauhnächte-Journal ${S}/${S + 1}`, ""];
+  const labels = { mood: "Stimmung", review: "Rückblick", answer: "Impulsfragen", release: "Losgelassen", thanks: "Dankbarkeit", dream: "Traum", signs: "Zeichen und Wetter", word: "Wort für den Monat", intention: "Mitgenommen" };
+  NIGHTS.forEach(n => {
+    const e = data[n.id];
+    if (n.id === "s1") out.push("## Sperrnächte", "");
+    if (n.id === "r1") out.push("## Rauhnächte", "");
+    out.push(`### ${nightTitle(n)}${n.month != null ? " · " + MONTHS[n.month] : ""} · ${n.theme}`, `_${nightLong(n.start)}_`, "");
+    if (!hasContent(e)) { out.push("(kein Eintrag)", ""); return; }
+    Object.keys(labels).forEach(k => { if (e[k] && String(e[k]).trim()) out.push(`**${labels[k]}:** ${String(e[k]).trim()}`, ""); });
+    const r = Object.keys(e.rituals || {}).filter(k => e.rituals[k]);
+    if (r.length) out.push(`**Rituale:** ${r.join(", ")}`, "");
+  });
+  const w = wishes();
+  out.push("## 13 Wünsche", "", w.sealed ? `${burnedCount()} von 12 Zetteln dem Feuer übergeben.` : `${w.list.filter(x => x.trim()).length} von 13 Wünschen geschrieben, noch nicht versiegelt.`, "");
+  out.push("---", "", "Wiederherstellen: Öffne das Journal, gehe auf „Sichern“ und lade diese Datei unter „Kopie wieder einlesen“ hoch. Die Zeile unten nicht verändern.", "", BACKUP_TAG + encodeBackup() + " -->");
+  return out.join("\n");
+}
+
+// Maschinenlesbare Kopie am Ende des Textes. Base64, damit versiegelte Wünsche nicht im Klartext erscheinen.
+const BACKUP_TAG = "<!-- rauhnaechte-backup:";
+function encodeBackup() {
+  const json = JSON.stringify({ app: "rauhnaechte-journal", v: 1, season: S, savedAt: new Date().toISOString(), data });
+  const bytes = new TextEncoder().encode(json);
+  let bin = ""; bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+function decodeBackup(text) {
+  const i = text.lastIndexOf(BACKUP_TAG);
+  if (i < 0) throw new Error("missing");
+  const b64 = text.slice(i + BACKUP_TAG.length).split("-->")[0].replace(/\s+/g, "");
+  const bin = atob(b64);
+  const obj = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+  if (obj.app !== "rauhnaechte-journal" || typeof obj.season !== "number" || !obj.data || typeof obj.data !== "object") throw new Error("invalid");
+  return obj;
+}
+const countEntries = d => NIGHTS.filter(n => hasContent(d[n.id])).length;
+const nightsWord = k => k === 1 ? "1 Nacht" : `${k} Nächte`;
+let importCandidate = null, importMsg = "";
+
+function renderExport() {
+  return `<div class="export"><div class="eyebrow">Sichern</div><h2>Dein Journal als Text</h2>
+    <p class="note">${store.coll ? "Deine Einträge liegen privat in deinem Konto, nur du kannst sie lesen." : "Deine Einträge liegen nur in diesem Browser. Zieh dir regelmäßig eine Kopie, damit nichts verloren geht."} Deine versiegelten Wünsche bleiben auch hier verborgen.</p>
+    <div class="row">${store.downloads || !window.claude ? `<button class="btn" id="dl">Als Datei speichern</button>` : ""}<button class="btn ghost" id="copy">Text kopieren</button><span class="note" id="copy-note"></span></div>
+    <label class="note" for="export-text">Vorschau</label>
+    <textarea id="export-text" readonly>${esc(exportText())}</textarea></div>
+  <div class="export" style="margin-top:40px">
+    <div class="eyebrow">Wiederherstellen</div><h2>Kopie wieder einlesen</h2>
+    <p class="note">Wähle eine gesicherte Journal-Datei aus oder füge den kopierten Text ein. So holst du deine Einträge auf ein neues Gerät oder zurück, nachdem Browserdaten gelöscht wurden.</p>
+    <div class="row"><label class="btn ghost" for="import-file" style="cursor:pointer">Datei auswählen</label>
+      <input type="file" id="import-file" accept=".md,.txt,text/plain,text/markdown" hidden></div>
+    <label class="note" for="import-text">Oder kopierten Text hier einfügen</label>
+    <textarea id="import-text" style="min-height:120px" placeholder="Den ganzen Text der Kopie einfügen, auch die letzte Zeile"></textarea>
+    <div class="row"><button class="btn" id="import-check">Kopie prüfen</button><span class="note" id="import-note">${esc(importMsg)}</span></div>
+    ${importCandidate ? (() => {
+      const c = importCandidate, label = `${c.season}/${String(c.season + 1).slice(2)}`;
+      const when = c.savedAt ? new Date(c.savedAt).toLocaleString("de-DE", { dateStyle: "long", timeStyle: "short" }) : "unbekannt";
+      const mine = c.season === S ? countEntries(data) : null;
+      return `<div class="confirm"><p><strong>Kopie gefunden:</strong> Jahreskreis ${label}, gesichert am ${esc(when)}, ${nightsWord(countEntries(c.data))} mit Einträgen${c.data.wishes && c.data.wishes.sealed ? ", 13 Wünsche versiegelt" : ""}.</p>
+        <p>Die Einträge für ${label} auf diesem Gerät werden durch die Kopie ersetzt${mine != null ? ` (aktuell ${nightsWord(mine)} mit Einträgen)` : ""}. Andere Jahreskreise bleiben unverändert.</p>
+        <div class="row"><button class="btn" id="import-yes">Kopie einlesen</button><button class="btn ghost" id="import-no">Abbrechen</button></div></div>`;
+    })() : ""}
+  </div>`;
+}
+
+// ---------- Interaktion ----------
+function bind() {
+  app.querySelectorAll("[data-open]").forEach(b => b.onclick = () => go({ name: "night", id: b.dataset.open }));
+  app.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go({ name: b.dataset.go }));
+  if (view.name === "night") {
+    const id = view.id, e = entry(id);
+    app.querySelectorAll("[data-key]").forEach(el => el.oninput = () => { e[el.dataset.key] = el.value; touch(id); });
+    app.querySelectorAll("[data-mood]").forEach(b => b.onclick = () => {
+      e.mood = e.mood === b.dataset.mood ? null : b.dataset.mood;
+      app.querySelectorAll("[data-mood]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mood === e.mood)));
+      touch(id);
+    });
+    app.querySelectorAll("[data-ritual]").forEach(c => c.onchange = () => { (e.rituals ||= {})[c.dataset.ritual] = c.checked; touch(id); });
+    app.querySelectorAll("[data-burn]").forEach(b => b.onclick = () => {
+      const w = wishes();
+      const left = w.list.map((_, i) => i).filter(i => !(i in w.burned));
+      if (left.length <= 1 || Object.values(w.burned).includes(id)) return;
+      w.burned[left[Math.floor(Math.random() * left.length)]] = id;
+      touch("wishes"); render();
+    });
+  }
+  if (view.name === "wishes") {
+    const w = wishes();
+    app.querySelectorAll("[data-wish]").forEach(el => el.oninput = () => {
+      w.list[+el.dataset.wish] = el.value; touch("wishes");
+      const filled = w.list.filter(x => x.trim()).length;
+      document.getElementById("wish-count").textContent = `${filled} von 13 geschrieben`;
+      document.getElementById("seal").disabled = filled < 13;
+    });
+    const seal = document.getElementById("seal");
+    if (seal) seal.onclick = () => { sealConfirm = true; render(); };
+    const yes = document.getElementById("seal-yes"), no = document.getElementById("seal-no");
+    if (yes) yes.onclick = () => { w.sealed = true; w.list = w.list.map(x => x.trim()); sealConfirm = false; touch("wishes"); render(); };
+    if (no) no.onclick = () => { sealConfirm = false; render(); };
+  }
+  if (view.name === "export") {
+    const note = document.getElementById("copy-note");
+    document.getElementById("copy").onclick = async () => {
+      const ta = document.getElementById("export-text");
+      try { await navigator.clipboard.writeText(ta.value); note.textContent = "Kopiert"; }
+      catch { ta.focus(); ta.select(); note.textContent = "Text ist markiert, jetzt kopieren"; }
+    };
+    const dl = document.getElementById("dl");
+    const filename = `Rauhnaechte-Journal-${S}-${S + 1}.md`;
+    if (dl) dl.onclick = async () => {
+      if (!store.downloads) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([exportText()], { type: "text/markdown;charset=utf-8" }));
+        a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        note.textContent = "Datei wird gespeichert"; return;
+      }
+      try { await store.downloads.save({ filename, data: exportText() }); note.textContent = "Gespeichert"; }
+      catch (e) { note.textContent = e && e.code === "declined" ? "" : "Speichern ging nicht. Nutze Text kopieren."; }
+    };
+    const check = text => {
+      try { importCandidate = decodeBackup(text); importMsg = ""; }
+      catch (e) { importCandidate = null; importMsg = e.message === "missing" ? "In diesem Text steckt keine Journal-Kopie. Achte darauf, auch die letzte Zeile mitzukopieren." : "Die Kopie ist beschädigt und lässt sich nicht lesen."; }
+      render();
+      const box = document.getElementById("import-yes") || document.getElementById("import-note");
+      box && box.scrollIntoView({ block: "center" });
+    };
+    document.getElementById("import-file").onchange = async ev => {
+      const f = ev.target.files && ev.target.files[0];
+      if (f) check(await f.text());
+    };
+    document.getElementById("import-check").onclick = () => check(document.getElementById("import-text").value);
+    const yes = document.getElementById("import-yes"), no = document.getElementById("import-no");
+    if (no) no.onclick = () => { importCandidate = null; render(); };
+    if (yes) yes.onclick = async () => {
+      const c = importCandidate;
+      if (c.season !== S) { await flush(); S = c.season; NIGHTS = nightsFor(S); }
+      const old = Object.keys(data);
+      data = JSON.parse(JSON.stringify(c.data));
+      old.forEach(k => { if (!(k in data)) data[k] = {}; });
+      Object.keys(data).forEach(k => pending.add(k));
+      saveLocal(); setStatus("saving", "Wird gespeichert …"); scheduleSave();
+      importCandidate = null;
+      importMsg = `Eingelesen: ${nightsWord(countEntries(data))} mit Einträgen für ${S}/${String(S + 1).slice(2)}.`;
+      render();
+    };
+  }
+}
+
+document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => go({ name: b.dataset.view }));
+function switchSeason(delta) {
+  flush();
+  S += delta; NIGHTS = nightsFor(S);
+  data = loadLocal();
+  if (view.name === "night") view = { name: "overview" };
+  render();
+  loadCloud().then(() => { if (!isTyping()) render(); });
+}
+document.getElementById("season-prev").onclick = () => switchSeason(-1);
+document.getElementById("season-next").onclick = () => { if (S < currentSeason + 1) switchSeason(1); };
+
+data = loadLocal();
+setStatus("idle", idleText());
+render();
+connect();
+})();
+</script>
+
+</body>
+</html>
